@@ -1,4 +1,5 @@
 #include "Client.h"
+#include "Packet.h"
 
 bool Client::CreateSocket()
 {
@@ -51,16 +52,23 @@ bool Client::Connect2Server(const char* address, u_short port)
 	}
 }
 
-////按照预定协议，客户端将发送一个学生的信息：
-//strcpy(stu.name, argv[2]);
-//stu.age = atoi(argv[3]);
-//ret = send(sClient, (char*)&stu, sizeof(stu), 0);
-//if (ret == SOCKET_ERROR)
-//{
-//	printf("send() failed!\n");
-//}
-//else
-//printf("student info has been sent!\n");
-//
+bool Client::RequestClientList()
+{
+	Packet::Header header;
+	header.packetType = Packet::PacketType::REQ4LIST;
+	header.length = 10;
+
+	int ret = send(sClient, (char*)&header, sizeof(header), 0);
+	if (ret == SOCKET_ERROR)
+	{
+		printf("send() failed!\n");
+		return false;
+	}
+	else
+		printf("student info has been sent!\n");
+
+	return true;
+}
+
 //closesocket(sClient);//关闭套接字
 //WSACleanup();

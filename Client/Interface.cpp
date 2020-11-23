@@ -34,4 +34,8 @@ void network::Interface::processInput(std::string& command)
 		std::cin >> port;
 		client.Connect2Server(addr.data(), port);
 	}
+	else if (command == "4")
+	{
+		client.RequestClientList();
+	}
 }

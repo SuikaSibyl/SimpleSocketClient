@@ -32,5 +32,8 @@
     <ClInclude Include="Interface.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="Packet.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
