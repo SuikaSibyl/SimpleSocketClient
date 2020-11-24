@@ -50,6 +50,9 @@ bool Client::Connect2Server(const char* address, u_short port)
 		WSACleanup();
 		return false;
 	}
+
+	auto f0 = std::bind(OutputLoop(), this);
+	threadPool.submit<std::function<void()>>(f0);
 }
 
 bool Client::RequestClientList()
@@ -70,5 +73,19 @@ bool Client::RequestClientList()
 	return true;
 }
 
+void OutputLoop::operator()(Client* client)
+{
+	while (true)
+	{
+		Packet::Header header;
+		Packet::Packet::ReceiveByLength(client->sClient, (char*)&header, sizeof(header));
+		std::cout << "Header Type: " << header.packetType << " | Header Length: " << header.length << std::endl;
+
+		char* content = new char[header.length];
+		Packet::Packet::ReceiveByLength(client->sClient, content, header.length);
+		std::string str(content, content + header.length);
+		std::cout << str << std::endl;
+	}
+}
 //closesocket(sClient);//¹Ø±ÕÌ×½Ó×Ö
 //WSACleanup();
