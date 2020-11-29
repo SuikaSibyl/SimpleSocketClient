@@ -14,8 +14,13 @@ class Client
 public:
 	bool CreateSocket();
 	bool isConnected() { return connected; }
-	bool Connect2Server(const char* address, u_short port);
+	bool Connect2Server();
+	bool DisConnect();
+	bool RequestTime();
+	bool RequestName();
 	bool RequestClientList();
+	bool SendInfo();
+	bool ExitPro();
 
 	friend class OutputLoop;
 private:

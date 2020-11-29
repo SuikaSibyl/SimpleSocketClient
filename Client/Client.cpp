@@ -33,43 +33,171 @@ bool Client::CreateSocket()
 	return true;
 }
 
-bool Client::Connect2Server(const char* address, u_short port)
+bool Client::Connect2Server()
 {
+	std::string addr;
+	u_short port;
+	std::cout << "Please Input server address:" << std::endl;
+	std::cin >> addr;
+	std::cout << "Please Input server port:" << std::endl;
+	std::cin >> port;
+	std::cout << "Connecting..." << std::endl;
+
 	struct sockaddr_in saServer;//地址信息
 
 	//构建服务器地址信息：
 	saServer.sin_family = AF_INET;//地址家族
 	saServer.sin_port = htons(port);//注意转化为网络字节序
-	saServer.sin_addr.S_un.S_addr = inet_addr(address);
+	saServer.sin_addr.S_un.S_addr = inet_addr(addr.data());
 
 	//连接服务器：
-	bool ret = connect(sClient, (struct sockaddr*)&saServer, sizeof(saServer));
+	int ret = connect(sClient, (struct sockaddr*)&saServer, sizeof(saServer));
 	if (ret == SOCKET_ERROR)
 	{
 		closesocket(sClient);//关闭套接字
 		WSACleanup();
 		return false;
 	}
+	//设置连接状态为已连接
+	connected = true;
 
-	auto f0 = std::bind(OutputLoop(), this);
+	//创建一个接收数据的子线程 -- 循环调用receive()
+	auto f0 = std::bind(OutputLoop(), this); //将可调用对象与参数绑定
 	threadPool.submit<std::function<void()>>(f0);
+
+	std::cout << "Connected to Server." << std::endl;
+	return true;
+}
+
+bool Client::DisConnect()
+{
+	std::cout << "Disonnecting..." << std::endl;
+	if (!connected)
+	{
+		printf("you haven't connected to any server!\n");
+		return false;
+	}
+
+	//组装请求数据包
+	Packet::Header header;
+	header.packetType = Packet::PacketType::DISCONNECT; //类型设置为断开请求
+	header.length = 0;
+	//发送请求给服务器
+	if (send(sClient, (char*)&header, sizeof(header), 0) < 0) {
+		WaitMessage();
+		printf("disconnect error\n");
+	}
+
+	//断开连接
+	if (sClient != INVALID_SOCKET)
+	{
+		closesocket(sClient);
+		sClient = INVALID_SOCKET;
+	}
+	//设置连接断开
+	connected = false;
+
+	//通知并等待子线程关闭
+	//bool ret = threadPool.empty();
+	//std::cout << ret << std::endl;
+	return true;
+}
+
+bool Client::RequestTime()
+{
+	std::cout << "Requesting time..." << std::endl;
+	if (!connected)
+	{
+		printf("you haven't connected to any server!\n");
+		return false;
+	}
+
+	//组装请求数据包
+	Packet::Header header;
+	header.packetType = Packet::PacketType::REQ4TIME; //类型设置为时间请求
+	header.length = 0;
+
+	//发送请求给服务器
+	if (send(sClient, (char*)&header, sizeof(header), 0) < 0) {
+		WaitMessage();
+		printf("cannot get time from sever\n");
+	}
+	return true;
+}
+
+bool Client::RequestName() {
+	std::cout << "Requesting name..." << std::endl;
+	if (!connected)
+	{
+		printf("you haven't connected to any server!\n");
+		return false;
+	}
+
+	//组装请求数据包
+	Packet::Header header;
+	header.packetType = Packet::PacketType::REQ4NAME; //类型设置为名字请求
+	header.length = 0;
+
+	//发送请求给服务器
+	if (send(sClient, (char*)&header, sizeof(header), 0) < 0) {
+		WaitMessage();
+		printf("cannot get name from sever\n");
+	}
+	return true;
 }
 
 bool Client::RequestClientList()
 {
-	Packet::Header header;
-	header.packetType = Packet::PacketType::REQ4LIST;
-	header.length = 10;
-
-	int ret = send(sClient, (char*)&header, sizeof(header), 0);
-	if (ret == SOCKET_ERROR)
+	std::cout << "Requesting client list..." << std::endl;
+	if (!connected)
 	{
-		printf("send() failed!\n");
+		printf("you haven't connected to any server!\n");
 		return false;
 	}
-	else
-		printf("student info has been sent!\n");
 
+	//组装请求数据包
+	Packet::Header header;
+	header.packetType = Packet::PacketType::REQ4LIST; //类型设置为列表请求
+	header.length = 0;
+
+	//发送请求给服务器
+	if (send(sClient, (char*)&header, sizeof(header), 0) < 0) {
+		WaitMessage();
+		printf("cannot get clientlist from sever\n");
+	}
+	return true;
+}
+
+bool Client::SendInfo() {
+	std::cout << "Sending message..." << std::endl;
+	if (!connected)
+	{
+		printf("you haven't connected to any server!\n");
+		return false;
+	}
+
+	//输入客户端的列表编号和要发送的内容
+	std::string tmpId;
+	std::string tmpMsg;
+	getchar();
+	std::cout << "Please enter client's id (3 digits) : ";
+	std::cin >> tmpId;
+	std::cout << "Please enter your message : ";
+	std::cin >> tmpMsg;
+
+	//组装请求数据包
+	Packet::Header header;
+	header.packetType = Packet::PacketType::SENDINFO; //类型设置为发送信息
+	std::string sendline = tmpId + tmpMsg;
+	header.length = sendline.length() + 1;
+
+	//发送请求给服务器
+	send(sClient, (char*)&header, sizeof(header), 0);
+	send(sClient, sendline.c_str(), header.length, 0);
+	return true;
+}
+
+bool Client::ExitPro() {
 	return true;
 }
 
