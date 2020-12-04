@@ -22,6 +22,8 @@ public:
 	bool SendInfo();
 	bool ExitPro();
 
+	~Client();
+
 	friend class OutputLoop;
 private:
 	SOCKET sClient;

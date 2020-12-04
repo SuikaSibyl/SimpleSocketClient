@@ -201,19 +201,47 @@ bool Client::ExitPro() {
 	return true;
 }
 
+Client::~Client() {
+	if (sClient != NULL)
+	{
+		closesocket(sClient);//关闭套接字
+		WSACleanup();
+	}
+}
+
 void OutputLoop::operator()(Client* client)
 {
 	while (true)
 	{
-		Packet::Header header;
-		Packet::Packet::ReceiveByLength(client->sClient, (char*)&header, sizeof(header));
-		std::cout << "Header Type: " << header.packetType << " | Header Length: " << header.length << std::endl;
+		if (client->connected)
+		{
+			Packet::RecvState recvState;
+			Packet::Header header;
+			recvState = Packet::Packet::ReceiveByLength(client->sClient, (char*)&header, sizeof(header));
+			if (client->connected == false)
+			{
+				std::cout << "Connection has been closed";
+			}
+			if (recvState != Packet::RecvState::SUCCESS)
+			{
+				//client->connected = false;
+				if (recvState == Packet::RecvState::UNEXPECTED) std::cout << "socket unexptected exit";
+				if (recvState == Packet::RecvState::CLOSE) std::cout << "socket closed";
+				continue;
+			}
+			std::cout << "Header Type: " << header.packetType << " | Header Length: " << header.length << std::endl;
 
-		char* content = new char[header.length];
-		Packet::Packet::ReceiveByLength(client->sClient, content, header.length);
-		std::string str(content, content + header.length);
-		std::cout << str << std::endl;
+			char* content = new char[header.length];
+			recvState = Packet::Packet::ReceiveByLength(client->sClient, content, header.length);
+			if (recvState != Packet::RecvState::SUCCESS)
+			{
+				//client->connected = false;
+				if (recvState == Packet::RecvState::UNEXPECTED) std::cout << "socket unexptected exit";
+				if (recvState == Packet::RecvState::CLOSE) std::cout << "socket closed";
+				continue;
+			}
+			std::string str(content, content + header.length);
+			std::cout << str << std::endl;
+		}
 	}
 }
-//closesocket(sClient);//关闭套接字
-//WSACleanup();
