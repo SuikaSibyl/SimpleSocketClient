@@ -211,6 +211,7 @@ Client::~Client() {
 
 void OutputLoop::operator()(Client* client)
 {
+	int i = 0;
 	while (true)
 	{
 		if (client->connected)
@@ -230,7 +231,11 @@ void OutputLoop::operator()(Client* client)
 				continue;
 			}
 			std::cout << "Header Type: " << header.packetType << " | Header Length: " << header.length << std::endl;
-
+			if (header.packetType == Packet::PacketType::INFO)
+			{
+				i++;
+				std::cout << i;
+			}
 			char* content = new char[header.length];
 			recvState = Packet::Packet::ReceiveByLength(client->sClient, content, header.length);
 			if (recvState != Packet::RecvState::SUCCESS)

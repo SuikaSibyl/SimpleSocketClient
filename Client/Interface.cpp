@@ -34,7 +34,10 @@ void network::Interface::processInput(std::string& command)
 		client.DisConnect();
 		break;
 	case '3': //获取时间: 请求服务端给出当前时间
-		client.RequestTime();
+		for (int i = 0; i < 100; i++)
+		{
+			client.RequestTime();
+		}
 		break;
 	case '4': //获取名字：请求服务端给出其机器的名称
 		client.RequestName();
