@@ -22,6 +22,11 @@ bool Client::CreateSocket()
 		return false;
 	}
 
+	return true;
+}
+
+bool Client::Connect2Server()
+{
 	//创建socket，使用TCP协议：
 	sClient = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (sClient == INVALID_SOCKET)
@@ -30,11 +35,7 @@ bool Client::CreateSocket()
 		std::cout << "socket() failed!\n";
 		return false;
 	}
-	return true;
-}
 
-bool Client::Connect2Server()
-{
 	std::string addr;
 	u_short port;
 	std::cout << "Please Input server address:" << std::endl;
@@ -198,6 +199,7 @@ bool Client::SendInfo() {
 }
 
 bool Client::ExitPro() {
+	DisConnect();
 	return true;
 }
 
@@ -211,7 +213,6 @@ Client::~Client() {
 
 void OutputLoop::operator()(Client* client)
 {
-	int i = 0;
 	while (true)
 	{
 		if (client->connected)
@@ -221,28 +222,24 @@ void OutputLoop::operator()(Client* client)
 			recvState = Packet::Packet::ReceiveByLength(client->sClient, (char*)&header, sizeof(header));
 			if (client->connected == false)
 			{
-				std::cout << "Connection has been closed";
+				std::cout << "Connection has been closed" << std::endl;
 			}
 			if (recvState != Packet::RecvState::SUCCESS)
 			{
 				//client->connected = false;
-				if (recvState == Packet::RecvState::UNEXPECTED) std::cout << "socket unexptected exit";
-				if (recvState == Packet::RecvState::CLOSE) std::cout << "socket closed";
+				if (recvState == Packet::RecvState::UNEXPECTED) std::cout << "socket unexptected exit" << std::endl;
+				if (recvState == Packet::RecvState::CLOSE) std::cout << "socket closed" << std::endl;
 				continue;
 			}
 			std::cout << "Header Type: " << header.packetType << " | Header Length: " << header.length << std::endl;
-			if (header.packetType == Packet::PacketType::INFO)
-			{
-				i++;
-				std::cout << i;
-			}
+
 			char* content = new char[header.length];
 			recvState = Packet::Packet::ReceiveByLength(client->sClient, content, header.length);
 			if (recvState != Packet::RecvState::SUCCESS)
 			{
 				//client->connected = false;
-				if (recvState == Packet::RecvState::UNEXPECTED) std::cout << "socket unexptected exit";
-				if (recvState == Packet::RecvState::CLOSE) std::cout << "socket closed";
+				if (recvState == Packet::RecvState::UNEXPECTED) std::cout << "socket unexptected exit" << std::endl;
+				if (recvState == Packet::RecvState::CLOSE) std::cout << "socket closed" << std::endl;
 				continue;
 			}
 			std::string str(content, content + header.length);

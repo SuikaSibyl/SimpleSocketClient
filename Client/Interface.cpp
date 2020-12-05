@@ -13,17 +13,23 @@ network::Interface::Interface()
 void network::Interface::enterMainLoop()
 {
 	std::string command;
-	system("cls");
-	std::cout << str1_funcs << std::endl;
-	std::cout << str2_split << str2_console << std::endl;
-	std::cout << str4_split << std::endl;
 	do
 	{
-		if (command.length()) { processInput(command); }
+		system("cls");
+		std::cout << str1_funcs << std::endl;
+		std::cout << str2_split << str2_console << std::endl;
+		std::cout << str4_split << std::endl;
+		if (command.length()) 
+		{ 
+			if (processInput(command))
+			{
+				return;
+			}
+		}
 	} while (std::cin >> command);
 }
 
-void network::Interface::processInput(std::string& command)
+bool network::Interface::processInput(std::string& command)
 {
 	switch (command[0])
 	{
@@ -50,8 +56,9 @@ void network::Interface::processInput(std::string& command)
 		break;
 	case '7':
 		client.ExitPro(); //退出：断开连接并退出客户端程序
-		break;
+		return true;
 	default:
 		break;
 	}
+	return false;
 }

@@ -13,7 +13,7 @@ namespace network
 
 	private:
 		Client client;
-		void processInput(std::string& command);
+		bool processInput(std::string& command);
 
 		std::string str1_funcs = "========================== 功能表单 ==========================\n\
 	1)连接：请求连接到指定地址和端口的服务端\n\
@@ -26,6 +26,7 @@ namespace network
 
 		std::string str2_split = "========================== 控制台输出 ==========================\n";
 		std::string str2_console = "";
+		std::string str2_connect = "Connection state: ";
 
 		std::string str4_split = "========================== 用户输入 ==========================";
 	};

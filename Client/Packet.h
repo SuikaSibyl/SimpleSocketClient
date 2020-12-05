@@ -12,14 +12,17 @@ namespace Packet
 	enum PacketType
 	{
 		NOTAPACKET,
-		//消息请求
+		//请求类型
 		REQ4NAME,
 		REQ4TIME,
 		REQ4LIST,
 		SENDINFO,
 		DISCONNECT,
-		//普通消息
-		INFO
+		//响应类型
+		RES4NAME,
+		RES4TIME,
+		RES4LIST,
+		INFO,
 	};
 
 
