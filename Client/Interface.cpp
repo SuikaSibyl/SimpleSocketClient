@@ -40,10 +40,7 @@ bool network::Interface::processInput(std::string& command)
 		client.DisConnect();
 		break;
 	case '3': //获取时间: 请求服务端给出当前时间
-		for (int i = 0; i < 100; i++)
-		{
-			client.RequestTime();
-		}
+		client.RequestTime();
 		break;
 	case '4': //获取名字：请求服务端给出其机器的名称
 		client.RequestName();
@@ -57,6 +54,12 @@ bool network::Interface::processInput(std::string& command)
 	case '7':
 		client.ExitPro(); //退出：断开连接并退出客户端程序
 		return true;
+	case '8': //获取时间: 请求服务端给出当前时间
+		client.count = 0;
+		for (int i = 0; i < 100; i++)
+		{
+			client.RequestTime();
+		}
 	default:
 		break;
 	}

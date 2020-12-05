@@ -23,6 +23,7 @@ public:
 	bool ExitPro();
 
 	~Client();
+	int count;
 
 	friend class OutputLoop;
 private:

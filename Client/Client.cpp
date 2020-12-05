@@ -244,6 +244,11 @@ void OutputLoop::operator()(Client* client)
 			}
 			std::string str(content, content + header.length);
 			std::cout << str << std::endl;
+			if (header.packetType == Packet::PacketType::RES4TIME)
+			{
+				client->count++;
+				std::cout << "Time received for " << client->count << " times!";
+			}
 		}
 	}
 }
