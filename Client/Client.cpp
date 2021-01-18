@@ -92,7 +92,13 @@ bool Client::DisConnect()
 	//断开连接
 	if (sClient != INVALID_SOCKET)
 	{
-		closesocket(sClient);
+		int ret;
+		ret = shutdown(sClient, SD_SEND);
+		if (ret == SOCKET_ERROR)
+		{
+			closesocket(sClient);
+			sClient = INVALID_SOCKET;
+		}
 		sClient = INVALID_SOCKET;
 	}
 	//设置连接断开
